@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberHUD // Terminal de Noticias Tech</title>
+    <!-- Fuentes Google Fonts para Estética Cyberpunk -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Rajdhani:wght@500;600;700;800&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Canvas Interactivo de Partículas y Cuadrícula Sci-Fi -->
+    <canvas id="cyber-canvas"></canvas>
+
+    <!-- Efecto CRT Scanlines (Toggleable) -->
+    <div id="scanlines-overlay" class="scanlines-overlay"></div>
+
+    <div class="app-container">
+        <!-- ================================================================
+             HUD Header: Estado del Sistema, Reloj y Acciones
+             ================================================================ -->
+        <header class="hud-header">
+            <div class="hud-brand">
+                <div class="hud-logo-icon">⚡</div>
+                <div class="hud-title-wrap">
+                    <h1>CYBERHUD // TECH RADAR</h1>
+                    <div class="hud-tagline">Terminal Personal de Inteligencia, Hardware, Gaming &amp; Código</div>
+                </div>
+            </div>
+
+            <div class="hud-status-bar">
+                <div class="telemetry-item">
+                    <span class="telemetry-label">Sistema</span>
+                    <span class="telemetry-val status-online">
+                        <span class="pulse-dot"></span> ONLINE
+                    </span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-label">Cronómetro HUD</span>
+                    <span class="telemetry-val" id="digital-clock">00:00:00</span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-label">Monitoreo</span>
+                    <span class="telemetry-val" id="active-feeds-val" style="color:var(--neon-ai);">44 FUENTES</span>
+                </div>
+            </div>
+
+            <div class="hud-actions">
+                <button class="cyber-btn" id="view-sources-btn" title="Ver catálogo de más de 40 fuentes">
+                    <span>📡</span>
+                    <span>FUENTES (44)</span>
+                </button>
+                <button class="cyber-btn active" id="toggle-scanlines" title="Alternar líneas CRT">
+                    <span>📺</span>
+                    <span>CRT SCAN</span>
+                </button>
+                <button class="cyber-btn" id="refresh-feeds-btn" title="Buscar actualizaciones en vivo">
+                    <span>🔄</span>
+                    <span>REFRESCAR FEEDS</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- ================================================================
+             Ticker de Noticias en Vivo (Marquee Animado)
+             ================================================================ -->
+        <section class="news-ticker-container">
+            <div class="ticker-badge">
+                <span>🔴</span>
+                <span>ÚLTIMA HORA</span>
+            </div>
+            <div class="ticker-track">
+                <div class="ticker-content" id="ticker-content">
+                    <!-- Titulares dinámicos inyectados por JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             Panel de Filtros, Categorías y Buscador en Vivo
+             ================================================================ -->
+        <section class="controls-panel">
+            <nav class="category-tabs" aria-label="Filtro de temas">
+                <button class="cat-tab active" data-cat="all">
+                    <span class="tab-icon">🌐</span>
+                    <span>Todas</span>
+                    <span class="tab-count" data-count-cat="all">0</span>
+                </button>
+                <button class="cat-tab" data-cat="ai">
+                    <span class="tab-icon">🤖</span>
+                    <span>Inteligencia Artificial</span>
+                    <span class="tab-count" data-count-cat="ai">0</span>
+                </button>
+                <button class="cat-tab" data-cat="hardware">
+                    <span class="tab-icon">⚡</span>
+                    <span>Hardware</span>
+                    <span class="tab-count" data-count-cat="hardware">0</span>
+                </button>
+                <button class="cat-tab" data-cat="gaming">
+                    <span class="tab-icon">🎮</span>
+                    <span>Videojuegos</span>
+                    <span class="tab-count" data-count-cat="gaming">0</span>
+                </button>
+                <button class="cat-tab" data-cat="dev">
+                    <span class="tab-icon">💻</span>
+                    <span>Programación</span>
+                    <span class="tab-count" data-count-cat="dev">0</span>
+                </button>
+                <button class="cat-tab" data-cat="saved">
+                    <span class="tab-icon">★</span>
+                    <span>Favoritos</span>
+                    <span class="tab-count" data-count-cat="saved">0</span>
+                </button>
+            </nav>
+
+            <div class="search-sort-group">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="search-input" placeholder="Buscar por título, fuente, tecnología..." autocomplete="off">
+                </div>
+                <select class="sort-select" id="sort-select" title="Criterio de orden">
+                    <option value="recent">Más Recientes</option>
+                    <option value="reading">Tiempo de Lectura</option>
+                    <option value="alpha">Alfabético</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             Grid Principal de Tarjetas de Noticias
+             ================================================================ -->
+        <main class="news-grid" id="news-grid">
+            <!-- Tarjetas generadas dinámicamente -->
+        </main>
+
+        <!-- ================================================================
+             Footer y Telemetría del Sistema
+             ================================================================ -->
+        <footer class="hud-footer">
+            <div class="footer-left">
+                <span>TERMINAL ID: <span style="color:var(--neon-ai);">CYBER-9000-X</span></span>
+                <span>PROTOCOLO: <span style="color:var(--neon-dev);">RSS / CORS DUAL-PROXY</span></span>
+                <span>MODO: <span style="color:var(--neon-hardware);">CLIENT-SIDE STANDALONE</span></span>
+            </div>
+            <div>
+                <span>Presiona [ESC] para cerrar modales • Clic en estrella para guardar noticias</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ================================================================
+         Modales Holográficos (Lectura Rápida y Catálogo de Fuentes)
+         ================================================================ -->
+    <div id="article-modal" class="modal-overlay" role="dialog" aria-modal="true">
+        <div class="modal-window">
+            <!-- Inyectado dinámicamente -->
+        </div>
+    </div>
+
+    <div id="sources-modal" class="modal-overlay" role="dialog" aria-modal="true">
+        <div class="modal-window">
+            <!-- Inyectado dinámicamente -->
+        </div>
+    </div>
+
+    <!-- Scripts Modulares -->
+    <script src="feeds.js"></script>
+    <script src="particles.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
