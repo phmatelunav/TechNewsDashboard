@@ -3,124 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberHUD // Terminal de Noticias Tech</title>
-    <!-- Fuentes Google Fonts para Estética Cyberpunk -->
+    <title>Tech Radar // Terminal de Noticias</title>
+    <!-- Tipografía Moderna y Editorial -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Rajdhani:wght@500;600;700;800&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Canvas Interactivo de Partículas y Cuadrícula Sci-Fi -->
+    <!-- Canvas de Fondo Ambiental Sutil -->
     <canvas id="cyber-canvas"></canvas>
-
-    <!-- Efecto CRT Scanlines (Toggleable) -->
-    <div id="scanlines-overlay" class="scanlines-overlay"></div>
 
     <div class="app-container">
         <!-- ================================================================
-             HUD Header: Estado del Sistema, Reloj y Acciones
+             Header: Marca, Telemetría y Acciones
              ================================================================ -->
         <header class="hud-header">
             <div class="hud-brand">
-                <div class="hud-logo-icon">⚡</div>
+                <div class="hud-logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+                        <path d="M2 12h20"/>
+                    </svg>
+                </div>
                 <div class="hud-title-wrap">
-                    <h1>CYBERHUD // TECH RADAR</h1>
-                    <div class="hud-tagline">Terminal Personal de Inteligencia, Hardware, Gaming &amp; Código</div>
+                    <h1>TECH RADAR</h1>
+                    <div class="hud-tagline">Monitoreo de IA, Hardware, Videojuegos y Desarrollo</div>
                 </div>
             </div>
 
             <div class="hud-status-bar">
                 <div class="telemetry-item">
-                    <span class="telemetry-label">Sistema</span>
+                    <span class="telemetry-label">Estado</span>
                     <span class="telemetry-val status-online">
-                        <span class="pulse-dot"></span> ONLINE
+                        <span class="pulse-dot"></span> EN VIVO
                     </span>
                 </div>
                 <div class="telemetry-item">
-                    <span class="telemetry-label">Cronómetro HUD</span>
+                    <span class="telemetry-label">Hora Local</span>
                     <span class="telemetry-val" id="digital-clock">00:00:00</span>
                 </div>
                 <div class="telemetry-item">
-                    <span class="telemetry-label">Monitoreo</span>
-                    <span class="telemetry-val" id="active-feeds-val" style="color:var(--neon-ai);">44 FUENTES</span>
+                    <span class="telemetry-label">Fuentes Activas</span>
+                    <span class="telemetry-val" id="active-feeds-val">44 Conectadas</span>
                 </div>
             </div>
 
             <div class="hud-actions">
-                <button class="cyber-btn" id="view-sources-btn" title="Ver catálogo de más de 40 fuentes">
-                    <span>📡</span>
-                    <span>FUENTES (44)</span>
+                <button class="action-btn" id="view-sources-btn" title="Ver catálogo de fuentes conectadas">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 11a9 9 0 0 1 9 9"></path>
+                        <path d="M4 4a16 16 0 0 1 16 16"></path>
+                        <circle cx="5" cy="19" r="1"></circle>
+                    </svg>
+                    <span>Fuentes (44)</span>
                 </button>
-                <button class="cyber-btn active" id="toggle-scanlines" title="Alternar líneas CRT">
-                    <span>📺</span>
-                    <span>CRT SCAN</span>
-                </button>
-                <button class="cyber-btn" id="refresh-feeds-btn" title="Buscar actualizaciones en vivo">
-                    <span>🔄</span>
-                    <span>REFRESCAR FEEDS</span>
+                <button class="action-btn" id="refresh-feeds-btn" title="Actualizar feeds en tiempo real">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                        <path d="M21 3v5h-5"></path>
+                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                        <path d="M3 21v-5h5"></path>
+                    </svg>
+                    <span>Actualizar</span>
                 </button>
             </div>
         </header>
 
         <!-- ================================================================
-             Ticker de Noticias en Vivo (Marquee Animado)
+             Ticker de Noticias en Vivo (Marquee)
              ================================================================ -->
         <section class="news-ticker-container">
             <div class="ticker-badge">
-                <span>🔴</span>
+                <span class="live-indicator"></span>
                 <span>ÚLTIMA HORA</span>
             </div>
             <div class="ticker-track">
                 <div class="ticker-content" id="ticker-content">
-                    <!-- Titulares dinámicos inyectados por JavaScript -->
+                    <!-- Titulares dinámicos -->
                 </div>
             </div>
         </section>
 
         <!-- ================================================================
-             Panel de Filtros, Categorías y Buscador en Vivo
+             Panel de Filtros, Categorías y Búsqueda
              ================================================================ -->
         <section class="controls-panel">
             <nav class="category-tabs" aria-label="Filtro de temas">
                 <button class="cat-tab active" data-cat="all">
-                    <span class="tab-icon">🌐</span>
+                    <span class="tab-icon">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                        </svg>
+                    </span>
                     <span>Todas</span>
                     <span class="tab-count" data-count-cat="all">0</span>
                 </button>
                 <button class="cat-tab" data-cat="ai">
-                    <span class="tab-icon">🤖</span>
+                    <span class="tab-icon">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>
+                        </svg>
+                    </span>
                     <span>Inteligencia Artificial</span>
                     <span class="tab-count" data-count-cat="ai">0</span>
                 </button>
                 <button class="cat-tab" data-cat="hardware">
-                    <span class="tab-icon">⚡</span>
+                    <span class="tab-icon">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2M9 2v2M20 15h2M20 9h2M15 20v2M9 20v2M2 15h2M2 9h2"/>
+                        </svg>
+                    </span>
                     <span>Hardware</span>
                     <span class="tab-count" data-count-cat="hardware">0</span>
                 </button>
                 <button class="cat-tab" data-cat="gaming">
-                    <span class="tab-icon">🎮</span>
+                    <span class="tab-icon">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="6"/>
+                        </svg>
+                    </span>
                     <span>Videojuegos</span>
                     <span class="tab-count" data-count-cat="gaming">0</span>
                 </button>
                 <button class="cat-tab" data-cat="dev">
-                    <span class="tab-icon">💻</span>
+                    <span class="tab-icon">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                        </svg>
+                    </span>
                     <span>Programación</span>
                     <span class="tab-count" data-count-cat="dev">0</span>
                 </button>
                 <button class="cat-tab" data-cat="saved">
-                    <span class="tab-icon">★</span>
-                    <span>Favoritos</span>
+                    <span class="tab-icon">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </span>
+                    <span>Guardados</span>
                     <span class="tab-count" data-count-cat="saved">0</span>
                 </button>
             </nav>
 
             <div class="search-sort-group">
                 <div class="search-box">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="search-input" placeholder="Buscar por título, fuente, tecnología..." autocomplete="off">
+                    <span class="search-icon">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                    </span>
+                    <input type="text" id="search-input" placeholder="Buscar por tema, tecnología o fuente..." autocomplete="off">
                 </div>
-                <select class="sort-select" id="sort-select" title="Criterio de orden">
+                <select class="sort-select" id="sort-select" title="Ordenar por">
                     <option value="recent">Más Recientes</option>
                     <option value="reading">Tiempo de Lectura</option>
                     <option value="alpha">Alfabético</option>
@@ -129,43 +165,37 @@
         </section>
 
         <!-- ================================================================
-             Grid Principal de Tarjetas de Noticias
+             Grid Principal de Tarjetas
              ================================================================ -->
         <main class="news-grid" id="news-grid">
             <!-- Tarjetas generadas dinámicamente -->
         </main>
 
         <!-- ================================================================
-             Footer y Telemetría del Sistema
+             Footer
              ================================================================ -->
         <footer class="hud-footer">
             <div class="footer-left">
-                <span>TERMINAL ID: <span style="color:var(--neon-ai);">CYBER-9000-X</span></span>
-                <span>PROTOCOLO: <span style="color:var(--neon-dev);">RSS / CORS DUAL-PROXY</span></span>
-                <span>MODO: <span style="color:var(--neon-hardware);">CLIENT-SIDE STANDALONE</span></span>
+                <span>TECH RADAR v2.0</span>
+                <span>•</span>
+                <span>44 fuentes conectadas en tiempo real</span>
             </div>
             <div>
-                <span>Presiona [ESC] para cerrar modales • Clic en estrella para guardar noticias</span>
+                <span>Presiona ESC para cerrar vistas previas • Guarda artículos con el icono de marcador</span>
             </div>
         </footer>
     </div>
 
-    <!-- ================================================================
-         Modales Holográficos (Lectura Rápida y Catálogo de Fuentes)
-         ================================================================ -->
+    <!-- Modales -->
     <div id="article-modal" class="modal-overlay" role="dialog" aria-modal="true">
-        <div class="modal-window">
-            <!-- Inyectado dinámicamente -->
-        </div>
+        <div class="modal-window"></div>
     </div>
 
     <div id="sources-modal" class="modal-overlay" role="dialog" aria-modal="true">
-        <div class="modal-window">
-            <!-- Inyectado dinámicamente -->
-        </div>
+        <div class="modal-window"></div>
     </div>
 
-    <!-- Scripts Modulares -->
+    <!-- Scripts -->
     <script src="feeds.js"></script>
     <script src="particles.js"></script>
     <script src="app.js"></script>

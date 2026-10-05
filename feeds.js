@@ -7,41 +7,37 @@ const CATEGORIES = {
     all: {
         id: 'all',
         name: 'Todas las Noticias',
-        color: '#00f3ff',
-        gradient: 'linear-gradient(135deg, #00f3ff, #ff007f)',
-        icon: 'grid'
+        color: '#6366f1',
+        gradient: 'linear-gradient(135deg, #6366f1, #38bdf8)',
+        badge: 'ALL'
     },
     ai: {
         id: 'ai',
         name: 'Inteligencia Artificial',
-        color: '#00f3ff',
-        gradient: 'linear-gradient(135deg, #00f3ff, #0088ff)',
-        icon: 'cpu',
-        badge: 'CYBER-AI'
+        color: '#818cf8',
+        gradient: 'linear-gradient(135deg, #6366f1, #818cf8)',
+        badge: 'AI'
     },
     hardware: {
         id: 'hardware',
-        name: 'Hardware Computacional',
-        color: '#ff9900',
-        gradient: 'linear-gradient(135deg, #ff9900, #ff5500)',
-        icon: 'hard-drive',
-        badge: 'OVERCLOCK'
+        name: 'Hardware',
+        color: '#f59e0b',
+        gradient: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
+        badge: 'HARDWARE'
     },
     gaming: {
         id: 'gaming',
         name: 'Videojuegos',
-        color: '#ff007f',
-        gradient: 'linear-gradient(135deg, #ff007f, #9900ff)',
-        icon: 'gamepad-2',
-        badge: 'GAME-CORE'
+        color: '#f43f5e',
+        gradient: 'linear-gradient(135deg, #f43f5e, #fb7185)',
+        badge: 'GAMING'
     },
     dev: {
         id: 'dev',
-        name: 'Programación & Dev',
-        color: '#00ff66',
-        gradient: 'linear-gradient(135deg, #00ff66, #00aa55)',
-        icon: 'code-2',
-        badge: 'DEV-MATRIX'
+        name: 'Programación',
+        color: '#10b981',
+        gradient: 'linear-gradient(135deg, #10b981, #34d399)',
+        badge: 'DEV'
     }
 };
 

@@ -1,5 +1,5 @@
 /**
- * app.js - CyberHUD Tech News Controller
+ * app.js - Tech Radar Controller
  * Gestión de estado, feeds asíncronos, filtros, búsqueda, marcadores y modales.
  */
 
@@ -10,7 +10,6 @@ class NewsDashboard {
         this.searchQuery = '';
         this.sortOrder = 'recent';
         this.bookmarks = this.loadBookmarks();
-        this.scanlinesActive = true;
         this.isLoadingFeeds = false;
 
         this.initDOMElements();
@@ -28,8 +27,6 @@ class NewsDashboard {
         this.searchInput = document.getElementById('search-input');
         this.sortSelect = document.getElementById('sort-select');
         this.clockElement = document.getElementById('digital-clock');
-        this.scanlinesOverlay = document.getElementById('scanlines-overlay');
-        this.scanlinesToggle = document.getElementById('toggle-scanlines');
         this.refreshBtn = document.getElementById('refresh-feeds-btn');
         this.sourcesBtn = document.getElementById('view-sources-btn');
         this.activeFeedsCount = document.getElementById('active-feeds-val');
@@ -47,7 +44,7 @@ class NewsDashboard {
             });
         });
 
-        // Búsqueda en vivo
+        // Búsqueda en tiempo real
         this.searchInput.addEventListener('input', (e) => {
             this.searchQuery = e.target.value.toLowerCase().trim();
             this.renderArticles();
@@ -57,13 +54,6 @@ class NewsDashboard {
         this.sortSelect.addEventListener('change', (e) => {
             this.sortOrder = e.target.value;
             this.renderArticles();
-        });
-
-        // Toggle de líneas de escaneo CRT
-        this.scanlinesToggle.addEventListener('click', () => {
-            this.scanlinesActive = !this.scanlinesActive;
-            this.scanlinesOverlay.classList.toggle('hidden', !this.scanlinesActive);
-            this.scanlinesToggle.classList.toggle('active', this.scanlinesActive);
         });
 
         // Botón de refrescar feeds
@@ -77,7 +67,7 @@ class NewsDashboard {
             this.openSourcesModal();
         });
 
-        // Cerrar modales
+        // Cerrar modales con botones de cerrar
         this.closeModalBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 this.closeModals();
@@ -86,9 +76,11 @@ class NewsDashboard {
 
         // Cerrar al hacer clic en el backdrop
         [this.articleModal, this.sourcesModal].forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) this.closeModals();
-            });
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) this.closeModals();
+                });
+            }
         });
 
         // Cerrar con Escape
@@ -106,7 +98,7 @@ class NewsDashboard {
             const utcHours = String(now.getUTCHours()).padStart(2, '0');
             const utcMins = String(now.getUTCMinutes()).padStart(2, '0');
             if (this.clockElement) {
-                this.clockElement.innerHTML = `${hours}:${mins}:${secs} <span style="font-size:0.75rem; color:var(--text-muted);">(UTC ${utcHours}:${utcMins})</span>`;
+                this.clockElement.innerHTML = `${hours}:${mins}:${secs} <span style="font-size:0.75rem; color:var(--text-muted); font-weight:400;">(UTC ${utcHours}:${utcMins})</span>`;
             }
         };
         update();
@@ -146,15 +138,9 @@ class NewsDashboard {
     setActiveCategory(cat) {
         this.activeCategory = cat;
 
-        // Actualizar clases activas en botones
         document.querySelectorAll('.cat-tab').forEach(tab => {
             tab.classList.toggle('active', tab.getAttribute('data-cat') === cat);
         });
-
-        // Color temático para el canvas
-        if (window.cyberBg && CATEGORIES[cat]) {
-            window.cyberBg.setCategoryGlow(CATEGORIES[cat].color);
-        }
 
         this.renderArticles();
     }
@@ -175,7 +161,7 @@ class NewsDashboard {
         }
 
         if (this.activeFeedsCount) {
-            this.activeFeedsCount.textContent = `${FEEDS_CATALOG.length} FUENTES`;
+            this.activeFeedsCount.textContent = `${FEEDS_CATALOG.length} Conectadas`;
         }
     }
 
@@ -188,7 +174,7 @@ class NewsDashboard {
             const cat = CATEGORIES[item.category] || CATEGORIES.ai;
             html += `
                 <div class="ticker-item" data-id="${item.id}">
-                    <span class="ticker-cat-tag" style="background:${cat.color}22; color:${cat.color}; border:1px solid ${cat.color}55;">
+                    <span class="ticker-cat-tag" style="background:${cat.color}1a; color:${cat.color};">
                         ${cat.name.split(' ')[0]}
                     </span>
                     <span>${this.escapeHtml(item.title)}</span>
@@ -197,10 +183,8 @@ class NewsDashboard {
             `;
         });
 
-        // Duplicar para efecto continuo de cinta
         this.tickerContent.innerHTML = html + html;
 
-        // Clic en items de la marquesina
         this.tickerContent.querySelectorAll('.ticker-item').forEach(el => {
             el.addEventListener('click', () => {
                 const id = el.getAttribute('data-id');
@@ -212,14 +196,12 @@ class NewsDashboard {
 
     getFilteredArticles() {
         return this.articles.filter(item => {
-            // Filtro por categoría
             if (this.activeCategory === 'saved') {
                 if (!this.bookmarks.includes(item.id)) return false;
             } else if (this.activeCategory !== 'all' && item.category !== this.activeCategory) {
                 return false;
             }
 
-            // Filtro por búsqueda
             if (this.searchQuery) {
                 const matchTitle = item.title.toLowerCase().includes(this.searchQuery);
                 const matchSummary = item.summary.toLowerCase().includes(this.searchQuery);
@@ -250,10 +232,15 @@ class NewsDashboard {
         if (filtered.length === 0) {
             this.newsGrid.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-icon">📡</div>
-                    <h3 class="empty-title">Sin resultados en este sector</h3>
-                    <p style="color:var(--text-secondary); max-width:450px; margin:0 auto;">
-                        No se encontraron registros que coincidan con "${this.escapeHtml(this.searchQuery)}" en la categoría seleccionada.
+                    <div class="empty-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </div>
+                    <h3 class="empty-title">Sin resultados en esta categoría</h3>
+                    <p style="color:var(--text-secondary); max-width:420px; margin:0 auto; font-size:0.9rem;">
+                        No se encontraron publicaciones que coincidan con "${this.escapeHtml(this.searchQuery)}".
                     </p>
                 </div>
             `;
@@ -267,18 +254,20 @@ class NewsDashboard {
             const tagsHtml = (article.tags || []).map(t => `<span class="tag-item">#${this.escapeHtml(t)}</span>`).join('');
             const articleImage = article.image || getDeterministicThemeImage(article.category, article.title);
 
+            const bookmarkSvg = isSaved
+                ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`
+                : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
+
             html += `
                 <article class="news-card" data-cat="${article.category}" data-id="${article.id}">
-                    <div class="corner-deco"></div>
-                    
                     <div class="card-media">
                         <img src="${articleImage}" alt="${this.escapeHtml(article.title)}" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80'">
                         <div class="card-media-overlay"></div>
                         <span class="card-category-badge">
-                            <span style="font-size:0.8rem;">●</span> ${cat.name}
+                            ${cat.name}
                         </span>
-                        <button class="bookmark-btn ${isSaved ? 'saved' : ''}" title="${isSaved ? 'Guardado' : 'Guardar noticia'}" data-bookmark-id="${article.id}">
-                            ${isSaved ? '★' : '☆'}
+                        <button class="bookmark-btn ${isSaved ? 'saved' : ''}" title="${isSaved ? 'Quitar de guardados' : 'Guardar artículo'}" data-bookmark-id="${article.id}">
+                            ${bookmarkSvg}
                         </button>
                     </div>
 
@@ -299,10 +288,10 @@ class NewsDashboard {
                                     <span>${this.escapeHtml(article.source)}</span>
                                 </div>
                                 <div class="card-meta-right">
-                                    <span>⏱️ ${article.readTime || '3 min'}</span>
-                                    <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="card-direct-link" title="Abrir noticia original en nueva pestaña">
-                                        <span>LEER</span>
-                                        <span>↗</span>
+                                    <span>${article.readTime || '3 min'}</span>
+                                    <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="card-direct-link" title="Abrir noticia original">
+                                        <span>Leer</span>
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
                                     </a>
                                 </div>
                             </div>
@@ -314,10 +303,8 @@ class NewsDashboard {
 
         this.newsGrid.innerHTML = html;
 
-        // Bind clicks de tarjetas y marcadores
         this.newsGrid.querySelectorAll('.news-card').forEach(card => {
             card.addEventListener('click', (e) => {
-                // Si el clic fue en bookmark o en el botón de enlace directo, no abrir el modal
                 if (e.target.closest('.bookmark-btn') || e.target.closest('.card-direct-link')) return;
                 const id = card.getAttribute('data-id');
                 const article = this.articles.find(a => a.id === id);
@@ -338,33 +325,31 @@ class NewsDashboard {
         this.isLoadingFeeds = true;
 
         if (this.refreshBtn) {
-            this.refreshBtn.innerHTML = `<span>⏳</span><span>ACTUALIZANDO...</span>`;
+            this.refreshBtn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin">
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                </svg>
+                <span>Actualizando...</span>
+            `;
             this.refreshBtn.classList.add('active');
         }
 
-        // Seleccionar feeds de alta disponibilidad para consulta en tiempo real
         const sampledFeeds = [
-            // AI
             FEEDS_CATALOG.find(f => f.id === 'venturebeat-ai'),
             FEEDS_CATALOG.find(f => f.id === 'theverge-ai'),
             FEEDS_CATALOG.find(f => f.id === 'openai'),
-            // Hardware
             FEEDS_CATALOG.find(f => f.id === 'tomshardware'),
             FEEDS_CATALOG.find(f => f.id === 'wccftech-hw'),
-            // Gaming
             FEEDS_CATALOG.find(f => f.id === 'ign'),
             FEEDS_CATALOG.find(f => f.id === 'eurogamer'),
             FEEDS_CATALOG.find(f => f.id === 'kotaku'),
             FEEDS_CATALOG.find(f => f.id === 'polygon'),
-            // Dev
             FEEDS_CATALOG.find(f => f.id === 'devto'),
             FEEDS_CATALOG.find(f => f.id === 'github-blog'),
             FEEDS_CATALOG.find(f => f.id === 'hackernews')
         ].filter(Boolean);
 
         const newArticles = [];
-
-        // Consultar feeds en paralelo con límite
         const promises = sampledFeeds.map(feed => fetchSingleFeed(feed));
         const results = await Promise.allSettled(promises);
 
@@ -375,7 +360,6 @@ class NewsDashboard {
         });
 
         if (newArticles.length > 0) {
-            // Evitar duplicados por título
             const existingTitles = new Set(this.articles.map(a => a.title.toLowerCase().trim()));
             const uniqueIncoming = newArticles.filter(a => !existingTitles.has(a.title.toLowerCase().trim()));
 
@@ -389,7 +373,15 @@ class NewsDashboard {
 
         this.isLoadingFeeds = false;
         if (this.refreshBtn) {
-            this.refreshBtn.innerHTML = `<span>🔄</span><span>REFRESCAR FEEDS</span>`;
+            this.refreshBtn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                    <path d="M21 3v5h-5"></path>
+                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                    <path d="M3 21v-5h5"></path>
+                </svg>
+                <span>Actualizar</span>
+            `;
             this.refreshBtn.classList.remove('active');
         }
     }
@@ -402,13 +394,13 @@ class NewsDashboard {
         const articleImage = article.image || getDeterministicThemeImage(article.category, article.title);
 
         this.articleModal.querySelector('.modal-window').innerHTML = `
-            <button class="modal-close-btn">&times;</button>
+            <button class="modal-close-btn" aria-label="Cerrar">&times;</button>
             <div class="modal-meta-top">
-                <span class="card-category-badge" style="background:${cat.color}22; color:${cat.color}; border:1px solid ${cat.color}55;">
+                <span class="card-category-badge">
                     ${cat.name}
                 </span>
-                <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--text-muted);">
-                    ID: ${article.id.slice(0, 14)}
+                <span style="font-size:0.8rem; color:var(--text-muted); font-family:var(--font-mono);">
+                    ${article.date || 'Reciente'}
                 </span>
             </div>
 
@@ -416,7 +408,6 @@ class NewsDashboard {
 
             <div class="modal-details-bar">
                 <span><strong>Fuente:</strong> ${this.escapeHtml(article.source)}</span>
-                <span><strong>Publicado:</strong> ${article.date || 'Reciente'}</span>
                 <span><strong>Lectura estimada:</strong> ${article.readTime || '3 min'}</span>
                 ${article.author ? `<span><strong>Autor:</strong> ${this.escapeHtml(article.author)}</span>` : ''}
             </div>
@@ -432,19 +423,21 @@ class NewsDashboard {
             </div>
 
             <div class="modal-actions">
-                <button class="cyber-btn modal-bookmark-toggle ${isSaved ? 'active' : ''}">
-                    ${isSaved ? '★ GUARDADO EN FAVORITOS' : '☆ GUARDAR PARA DESPUÉS'}
+                <button class="action-btn modal-bookmark-toggle ${isSaved ? 'active' : ''}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span>${isSaved ? 'Guardado en favoritos' : 'Guardar para leer después'}</span>
                 </button>
                 <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="external-link-btn">
-                    <span>LEER ARTÍCULO EN ${this.escapeHtml(article.source).toUpperCase()}</span>
-                    <span>↗</span>
+                    <span>Leer artículo en ${this.escapeHtml(article.source)}</span>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
                 </a>
             </div>
         `;
 
         this.articleModal.classList.add('active');
 
-        // Bind boton de cerrar y favoritos dentro del modal
         this.articleModal.querySelector('.modal-close-btn').addEventListener('click', () => {
             this.closeModals();
         });
@@ -455,7 +448,7 @@ class NewsDashboard {
                 this.toggleBookmark(article.id);
                 const updatedSaved = this.bookmarks.includes(article.id);
                 modalBmBtn.classList.toggle('active', updatedSaved);
-                modalBmBtn.textContent = updatedSaved ? '★ GUARDADO EN FAVORITOS' : '☆ GUARDAR PARA DESPUÉS';
+                modalBmBtn.querySelector('span').textContent = updatedSaved ? 'Guardado en favoritos' : 'Guardar para leer después';
             });
         }
     }
@@ -464,15 +457,15 @@ class NewsDashboard {
         if (!this.sourcesModal) return;
 
         let contentHtml = `
-            <button class="modal-close-btn">&times;</button>
+            <button class="modal-close-btn" aria-label="Cerrar">&times;</button>
             <div class="modal-meta-top">
-                <span class="card-category-badge" style="background:#00f3ff22; color:#00f3ff; border:1px solid #00f3ff55;">
-                    SISTEMA DE FUENTES
+                <span class="card-category-badge">
+                    DIRECTORIO
                 </span>
             </div>
-            <h2 class="modal-title">Catálogo Completo de Fuentes (+44 Feeds)</h2>
-            <p style="color:var(--text-secondary); margin-bottom:1.5rem; font-size:0.92rem;">
-                Feeds RSS y portales oficiales conectados para monitoreo en vivo de Inteligencia Artificial, Hardware, Gaming y Programación.
+            <h2 class="modal-title">Fuentes Conectadas (44 medios)</h2>
+            <p style="color:var(--text-secondary); margin-bottom:1.5rem; font-size:0.9rem;">
+                Publicaciones internacionales en Inteligencia Artificial, Hardware, Videojuegos y Desarrollo.
             </p>
             <div class="sources-modal-body">
         `;
@@ -483,10 +476,11 @@ class NewsDashboard {
                 <div class="source-item-card">
                     <div>
                         <div class="source-item-name">${this.escapeHtml(feed.name)}</div>
-                        <div style="font-size:0.75rem; color:${cat.color}; font-family:var(--font-mono);">${cat.name}</div>
+                        <div style="font-size:0.75rem; color:${cat.color}; font-weight:500;">${cat.name}</div>
                     </div>
-                    <a href="${feed.site}" target="_blank" rel="noopener noreferrer" class="cyber-btn" style="padding:0.3rem 0.6rem; font-size:0.78rem;">
-                        VISITAR ↗
+                    <a href="${feed.site}" target="_blank" rel="noopener noreferrer" class="action-btn" style="padding:0.25rem 0.6rem; font-size:0.75rem;">
+                        <span>Visitar</span>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
                     </a>
                 </div>
             `;
@@ -495,7 +489,7 @@ class NewsDashboard {
         contentHtml += `
             </div>
             <div style="margin-top:2rem; text-align:right;">
-                <button class="cyber-btn close-sources-btn">CERRAR TERMINAL</button>
+                <button class="action-btn close-sources-btn">Cerrar</button>
             </div>
         `;
 
@@ -522,7 +516,6 @@ class NewsDashboard {
     }
 }
 
-// Inicialización de la aplicación
 window.addEventListener('DOMContentLoaded', () => {
     window.app = new NewsDashboard();
 });
