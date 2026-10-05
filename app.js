@@ -9,6 +9,7 @@ class NewsDashboard {
         this.activeCategory = 'all';
         this.searchQuery = '';
         this.sortOrder = 'recent';
+        this.timeRange = '3'; // Por defecto: últimos 3 días
         this.bookmarks = this.loadBookmarks();
         this.isLoadingFeeds = false;
 
@@ -26,6 +27,7 @@ class NewsDashboard {
         this.tickerContent = document.getElementById('ticker-content');
         this.searchInput = document.getElementById('search-input');
         this.sortSelect = document.getElementById('sort-select');
+        this.timeSelect = document.getElementById('time-select');
         this.clockElement = document.getElementById('digital-clock');
         this.refreshBtn = document.getElementById('refresh-feeds-btn');
         this.sourcesBtn = document.getElementById('view-sources-btn');
@@ -55,6 +57,15 @@ class NewsDashboard {
             this.sortOrder = e.target.value;
             this.renderArticles();
         });
+
+        // Filtro de rango de tiempo (Últimos 3 días por defecto)
+        if (this.timeSelect) {
+            this.timeSelect.addEventListener('change', (e) => {
+                this.timeRange = e.target.value;
+                this.updateCategoryCounts();
+                this.renderArticles();
+            });
+        }
 
         // Botón de refrescar feeds
         this.refreshBtn.addEventListener('click', () => {
@@ -146,12 +157,24 @@ class NewsDashboard {
     }
 
     updateCategoryCounts() {
+        const now = Date.now();
+        const timeFiltered = this.articles.filter(item => {
+            if (this.timeRange !== 'all') {
+                const days = parseFloat(this.timeRange);
+                const maxAgeMs = days * 24 * 60 * 60 * 1000;
+                if (item.timestamp && (now - item.timestamp > maxAgeMs)) {
+                    return false;
+                }
+            }
+            return true;
+        });
+
         const counts = {
-            all: this.articles.length,
-            ai: this.articles.filter(a => a.category === 'ai').length,
-            hardware: this.articles.filter(a => a.category === 'hardware').length,
-            gaming: this.articles.filter(a => a.category === 'gaming').length,
-            dev: this.articles.filter(a => a.category === 'dev').length,
+            all: timeFiltered.length,
+            ai: timeFiltered.filter(a => a.category === 'ai').length,
+            hardware: timeFiltered.filter(a => a.category === 'hardware').length,
+            gaming: timeFiltered.filter(a => a.category === 'gaming').length,
+            dev: timeFiltered.filter(a => a.category === 'dev').length,
             saved: this.bookmarks.length
         };
 
@@ -167,10 +190,21 @@ class NewsDashboard {
 
     renderTicker() {
         if (!this.tickerContent) return;
-        const topArticles = this.articles.slice(0, 10);
+        const now = Date.now();
+        const recentArticles = this.articles.filter(item => {
+            if (this.timeRange !== 'all') {
+                const days = parseFloat(this.timeRange);
+                const maxAgeMs = days * 24 * 60 * 60 * 1000;
+                if (item.timestamp && (now - item.timestamp > maxAgeMs)) {
+                    return false;
+                }
+            }
+            return true;
+        }).slice(0, 10);
+
         let html = '';
 
-        topArticles.forEach(item => {
+        recentArticles.forEach(item => {
             const cat = CATEGORIES[item.category] || CATEGORIES.ai;
             html += `
                 <div class="ticker-item" data-id="${item.id}">
@@ -195,7 +229,18 @@ class NewsDashboard {
     }
 
     getFilteredArticles() {
+        const now = Date.now();
+
         return this.articles.filter(item => {
+            // Filtro de tiempo (3 días por defecto)
+            if (this.timeRange !== 'all') {
+                const days = parseFloat(this.timeRange);
+                const maxAgeMs = days * 24 * 60 * 60 * 1000;
+                if (item.timestamp && (now - item.timestamp > maxAgeMs)) {
+                    return false;
+                }
+            }
+
             if (this.activeCategory === 'saved') {
                 if (!this.bookmarks.includes(item.id)) return false;
             } else if (this.activeCategory !== 'all' && item.category !== this.activeCategory) {
